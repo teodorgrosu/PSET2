@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gauss-integration-toy"
+version = "0.3.0"
+description = "A package that computes Gaussian quadrature schemes (CSXXX - Spring XXXX)"
+authors = [
+  {name = "Carla Character", email = "cc@fakeu.edu"},
+  {name = "Frank Fictional", email = "ff@fakeu.edu"},
+  {name = "Iris Imaginary", email = "ii@fakeu.edu"}
+]
+licence = "MIT"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["gauss/"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = ["tests"]
+
+
+[tool.ruff.lint]
+extend-select = [
+  "B",           # flake8-bugbear
+  "I",           # isort
+  "ARG",         # flake8-unused-arguments
+  "C4",          # flake8-comprehensions
+  "EM",          # flake8-errmsg
+  "ICN",         # flake8-import-conventions
+  "ISC",         # flake8-implicit-str-concat
+  "G",           # flake8-logging-format
+  "PGH",         # pygrep-hooks
+  "PIE",         # flake8-pie
+  "PL",          # pylint
+  "PT",          # flake8-pytest-style
+  "PTH",         # flake8-use-pathlib
+  "RET",         # flake8-return
+  "RUF",         # Ruff-specific
+  "SIM",         # flake8-simplify
+  "T20",         # flake8-print
+  "UP",          # pyupgrade
+  "YTT",         # flake8-2020
+  "EXE",         # flake8-executable
+]
+ignore = [
+  "PLR",    # Design related pylint codes
+  "ISC001", # Conflicts with formatter
+]
+flake8-unused-arguments.ignore-variadic-names = true
