@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import shutil
+import sys
+from pathlib import Path
+
+repo_root_dir = Path(__file__).parent
+backup_dir = repo_root_dir / "backups/"
+
+
+def get_avail_checkpoints() -> list[str]:
+    """Recovers all of the checkpoints that can be reset to.
+
+    Returns:
+        list[str]: the checkpoint names
+    """
+    # all backups will be in here:
+
+    if not backup_dir.exists():
+        backup_dir.mkdir()
+
+    # .git folder should have a HEAD file
+    return [
+        f.name
+        for f in backup_dir.iterdir()
+        if f.is_dir() and (f / "HEAD").exists()
+    ]
+
+
+def set_checkpoint(name: str) -> None:
+    backup_fol = backup_dir / name
+    if backup_fol.exists():
+        should_del_opt = input(f'Checkpoint "{name}" already exists. Overwrite? (y/N)')
+        if should_del_opt.lower().startswith("y"):
+            shutil.rmtree(backup_fol)
+        else:
+            return
+    shutil.copytree(repo_root_dir / ".git", backup_fol)
+
+
+def reset_checkpoint(name: str) -> None:
+    if name not in get_avail_checkpoints():
+        print(  # noqa: T201
+            f'Unknown checkpoint name "{name}". Use "checkpoint list" '
+            "to see a list of available checkpoints.",
+            file=sys.stderr,
+        )
+        return
+
+    backup_fol = backup_dir / name
+    shutil.rmtree(repo_root_dir / ".git")
+    shutil.copytree(backup_fol, repo_root_dir / ".git")
+    os.system("git clean -f")
+
+
+def remove_checkpoint(name: str) -> None: 
+    if name not in get_avail_checkpoints():
+        print(  # noqa: T201
+            f'Unknown checkpoint name "{name}". Use "checkpoint list" '
+            "to see a list of available checkpoints.",
+            file=sys.stderr,
+        )
+        return
+
+    backup_fol = backup_dir / name
+    shutil.rmtree(backup_fol)
+def list_checkpoints() -> None:
+    for checkpoint in get_avail_checkpoints():
+        print(checkpoint)  # noqa: T201
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description=(
+            "Utility for creating checkpoints on the git history. "
+            "Use this if you made a mistake, or want to "
+            "back-up your work."
+        )
+    )
+    subparsers = parser.add_subparsers(
+        help="whether to set, revert to, list, or remove checkpoints",
+        required=True,
+        dest="cmd",
+    )
+    create_parser = subparsers.add_parser("set", help="add (or update) a checkpoint")
+    create_parser.add_argument(
+        "name",
+        help=(
+            "name of the checkpoint to set. You will reference "
+            "this name when calling 'checkpoint reset'."
+        ),
+    )
+    revert_parser = subparsers.add_parser("reset", help="reset history to a checkpoint")
+    revert_parser.add_argument(
+        "name",
+        help=("name of the checkpoint to reset to."),
+    )
+    remove_parser = subparsers.add_parser(
+        "remove", help="removes a checkpoint from history"
+    )
+    remove_parser.add_argument(
+        "name",
+        help=("name of the checkpoint to reset to."),
+    )
+    list_parser = subparsers.add_parser(
+        "list", help="prints out a list of all checkpoints set"
+    )
+
+    args = parser.parse_args()
+    if args.cmd == "set":
+        set_checkpoint(args.name)
+    elif args.cmd == "reset":
+        reset_checkpoint(args.name)
+    elif args.cmd == "remove":
+        remove_checkpoint(args.name)
+    elif args.cmd == "list":
+        list_checkpoints()
