@@ -1,0 +1,11 @@
+Part 2:
+
+I chose to stay on the orthotest branch because there are more tests implemented in this branch.
+
+Part 3:
+
+A report usually needs to reflect the entire progress of the project. In the current setup, the report gets modified with every commit, and when merging branches conflicts always have to get resolved. It is both inconvenient, and there is a risk of losing information from one branch to another, such that at the end of the project one might have to go back and make sure no information was lost.
+
+Part 4::
+
+The tests fail because of the difference in the precision of the algorithm, and the precision expected by the test after the previous merge.
